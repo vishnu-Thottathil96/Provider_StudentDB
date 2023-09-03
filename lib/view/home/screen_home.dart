@@ -47,6 +47,16 @@ class HomeScreen extends StatelessWidget {
                 height: ScreenSize.screenHeight / 17,
                 child: CupertinoSearchTextField(
                   controller: searchController,
+                  onChanged: (query) {
+                    if (query.isNotEmpty) {
+                      studentController.searchHelper(query);
+                      print("Search query: $query");
+                      print(
+                          "Filtered student list: ${studentController.studentList}");
+                    } else {
+                      studentController.getFromDb();
+                    }
+                  },
                 ),
               ),
               kHeight20,

@@ -30,4 +30,15 @@ class SatateManager with ChangeNotifier {
     await db.deleteStudent(id);
     getFromDb();
   }
+
+  searchHelper(String searchQuery) async {
+    await getFromDb();
+    final searchList = studentList
+        .where((student) =>
+            student.name.toLowerCase().contains(searchQuery.toLowerCase()))
+        .toList();
+    studentList = searchList;
+    notifyListeners();
+    print("Filtered student list in search function: $searchList");
+  }
 }
