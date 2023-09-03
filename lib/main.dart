@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:providerstudentdb/view/splash/screen_splash.dart';
 
 import 'controller/db_functions.dart';
+import 'controller/state_controller/state_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final db = DB.instance;
+  final db = DB();
   await db.initialiseDatabase();
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider<SatateManager>(
+      create: (BuildContext context) => SatateManager(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

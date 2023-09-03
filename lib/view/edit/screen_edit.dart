@@ -2,10 +2,12 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:providerstudentdb/controller/state_controller/state_controller.dart';
 import 'package:providerstudentdb/view/home/screen_home.dart';
 import '../../constants/colors.dart';
 import '../../constants/space.dart';
-import '../../controller/db_functions.dart';
+
 import '../../model/student_model.dart';
 import '../../widgets/custom_textfield.dart';
 
@@ -27,7 +29,10 @@ class EditScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String imageToUpdate = student.image;
+    final studentController =
+        Provider.of<SatateManager>(context, listen: false);
+    //String imageToUpdate = student.image;
+    studentController.imageNotifier = student.image;
     List<dynamic> currentValues = [
       student.name,
       student.batch,
@@ -56,10 +61,12 @@ class EditScreen extends StatelessWidget {
               kHeight10,
               Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundImage: FileImage(File(student.image)),
-                  ),
+                  Consumer<SatateManager>(builder: (context, value, _) {
+                    return CircleAvatar(
+                      radius: 70,
+                      backgroundImage: FileImage(File(value.imageNotifier)),
+                    );
+                  }),
                   Positioned(
                     bottom: 0,
                     left: 90,
@@ -67,7 +74,8 @@ class EditScreen extends StatelessWidget {
                       onPressed: () async {
                         imagePiked = await _pickImage();
                         if (imagePiked != null) {
-                          imageToUpdate = imagePiked!.path;
+                          studentController.imageUpdator(imagePiked!.path);
+                          //imageToUpdate = imagePiked!.path;
                         }
                       },
                       icon: const Icon(
@@ -106,13 +114,12 @@ class EditScreen extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           backgroundColor: themeColor,
           onPressed: () async {
-            print('button pressed');
             if (!_formKey.currentState!.validate()) {
               return;
             }
             _formKey.currentState!.save();
 
-            if (imageToUpdate.isEmpty) {
+            if (studentController.imageNotifier.isEmpty) {
               return;
             }
             final student = StudentModel(
@@ -121,10 +128,11 @@ class EditScreen extends StatelessWidget {
                 phone: currentValues[2],
                 mail: currentValues[3],
                 address: currentValues[4],
-                image: imageToUpdate,
+                image: studentController.imageNotifier,
                 id: currentValues[5]);
 
-            await DB.instance.updateStudent(student, student.id!);
+            //await DB.instance.updateStudent(student, student.id!);
+            await studentController.editFromDb(student, student.id!);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 duration: Duration(seconds: 3),
@@ -132,10 +140,11 @@ class EditScreen extends StatelessWidget {
                 backgroundColor: Colors.green,
               ),
             );
+            // ignore: use_build_context_synchronously
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => HomeScreen(),
+                  builder: (context) => const HomeScreen(),
                 ),
                 (route) => false);
           },

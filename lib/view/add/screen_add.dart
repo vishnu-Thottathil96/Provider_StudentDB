@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../constants/space.dart';
-import '../../controller/db_functions.dart';
+import '../../controller/state_controller/state_controller.dart';
 import '../../model/student_model.dart';
 import '../../widgets/circle_add.dart';
 import '../../widgets/custom_textfield.dart';
@@ -14,7 +15,6 @@ List<String> fieldNames = [
   'Mail id',
   'Address',
 ];
-//ValueNotifier<String> imageNotifier = ValueNotifier('');
 
 class AddScreen extends StatelessWidget {
   AddScreen({Key? key}) : super(key: key);
@@ -25,8 +25,18 @@ class AddScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //final studentController = context.read<SatateManager>();
+    final studentController =
+        Provider.of<SatateManager>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              studentController.imageUpdator('');
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
           actions: const [
             Padding(
               padding: EdgeInsets.only(right: 8.0),
@@ -74,7 +84,7 @@ class AddScreen extends StatelessWidget {
               return;
             }
             _formKey.currentState!.save();
-            if (selectedImage.isEmpty) {
+            if (studentController.imageNotifier.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Image required'),
@@ -82,12 +92,7 @@ class AddScreen extends StatelessWidget {
                   duration: Duration(seconds: 3),
                 ),
               );
-              // Get.showSnackbar(const GetSnackBar(
-              //   title: 'Image required',
-              //   message: 'Please upload an image',
-              //   duration: Duration(seconds: 2),
-              //   backgroundColor: Colors.red,
-              // ));
+
               return;
             }
             final student = StudentModel(
@@ -96,11 +101,12 @@ class AddScreen extends StatelessWidget {
               phone: toSaveValues[2],
               mail: toSaveValues[3],
               address: toSaveValues[4],
-              image: selectedImage,
+              image: studentController.imageNotifier,
             );
 
-            await DB.instance.addStudent(student);
-            selectedImage = '';
+            // await DB.instance.addStudent(student);
+            await studentController.addToDb(student);
+            studentController.imageNotifier = '';
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 duration: Duration(seconds: 3),

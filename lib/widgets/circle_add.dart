@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:providerstudentdb/constants/colors.dart';
+import 'package:providerstudentdb/controller/state_controller/state_controller.dart';
 
 XFile? pickedImage;
-
-String selectedImage = '';
 
 class CircleAvatarWithAddButton extends StatelessWidget {
   CircleAvatarWithAddButton({
@@ -14,22 +15,25 @@ class CircleAvatarWithAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final studentController =
+        Provider.of<SatateManager>(context, listen: false);
     return Stack(
       children: [
-        Container(
-          height: 150,
-          width: 150,
-          decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.amber,
-              image: selectedImage.isEmpty
-                  ? const DecorationImage(
-                      image: AssetImage('assets/images/defaultprofile.png'),
-                      fit: BoxFit.cover)
-                  : DecorationImage(
-                      image: FileImage(File(selectedImage)),
-                      fit: BoxFit.cover)),
-        ),
+        Consumer<SatateManager>(builder: (context, value, _) {
+          return Container(
+            height: 150,
+            width: 150,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: value.imageNotifier.isEmpty
+                    ? const DecorationImage(
+                        image: AssetImage('assets/images/defaultprofile.png'),
+                        fit: BoxFit.cover)
+                    : DecorationImage(
+                        image: FileImage(File(value.imageNotifier)),
+                        fit: BoxFit.cover)),
+          );
+        }),
         Positioned(
           bottom: -5,
           left: 90,
@@ -37,12 +41,13 @@ class CircleAvatarWithAddButton extends StatelessWidget {
             onPressed: () async {
               pickedImage = await _pickImage();
               if (pickedImage != null) {
-                selectedImage = pickedImage!.path;
+                studentController.imageUpdator(pickedImage!.path);
               }
             },
             icon: const Icon(
               Icons.add_a_photo_outlined,
               size: 35,
+              color: themeColor,
             ),
           ),
         ),
