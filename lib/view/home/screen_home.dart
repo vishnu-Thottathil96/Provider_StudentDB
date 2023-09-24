@@ -7,7 +7,7 @@ import 'package:providerstudentdb/view/home/widgets/card.dart';
 import '../../constants/colors.dart';
 import '../../constants/screen_size.dart';
 import '../../constants/space.dart';
-import '../../controller/db_functions.dart';
+
 import '../../model/student_model.dart';
 import '../add/screen_add.dart';
 
